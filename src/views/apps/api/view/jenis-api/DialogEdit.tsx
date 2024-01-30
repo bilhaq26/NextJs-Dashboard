@@ -8,7 +8,14 @@ import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
 import axios from 'axios'
 
-const DialogEditJenisApi = ({ isDialogEditOpen, handleCloseDialogEdit, jenisApiIdToEdit, updateTableData, data }) => {
+const DialogEditJenisApi = ({
+  isDialogEditOpen,
+  handleCloseDialogEdit,
+  jenisApiIdToEdit,
+  updateTableData,
+  data,
+  showAlert
+}) => {
   const [editedData, setEditedData] = useState({
     nama: data ? data.nama : ''
   })
@@ -35,6 +42,8 @@ const DialogEditJenisApi = ({ isDialogEditOpen, handleCloseDialogEdit, jenisApiI
       setEditedData({
         nama: ''
       })
+
+      showAlert('error', 'Data berhasil dihapus')
     } catch (error) {
       console.error('Error updating data:', error)
     }

@@ -8,7 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import { useDispatch } from 'react-redux'
 import axios from 'axios'
 
-const DialogHapusJenisApi = ({ open, handleClose, jenisApiId, updateTableData }) => {
+const DialogHapusJenisApi = ({ open, handleClose, jenisApiId, updateTableData, showAlert }) => {
   const dispatch = useDispatch()
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -25,6 +25,8 @@ const DialogHapusJenisApi = ({ open, handleClose, jenisApiId, updateTableData })
         updateTableData()
 
         handleClose()
+
+        showAlert('Data berhasil dihapus')
       } catch (error) {
         console.error('Error deleting jenis API:', error)
 

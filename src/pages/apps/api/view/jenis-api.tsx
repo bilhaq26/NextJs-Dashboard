@@ -12,6 +12,8 @@ import DialogTambahJenisApi from 'src/views/apps/api/view/jenis-api/DialogTambah
 import Icon from 'src/@core/components/icon'
 import DialogHapusJenisApi from 'src/views/apps/api/view/jenis-api/DialogHapus'
 import DialogEditJenisApi from 'src/views/apps/api/view/jenis-api/DialogEdit'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 const JenisApi = () => {
   const [data, setData] = useState([])
@@ -20,6 +22,13 @@ const JenisApi = () => {
   const [jenisApiIdToEdit, setJenisApiIdToEdit] = useState(null)
   const [isDialogHapusOpen, setIsDialogHapusOpen] = useState(false)
   const [jenisApiIdToDelete, setJenisApiIdToDelete] = useState(null)
+  const [alertMessage, setAlertMessage] = useState('')
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
+
+  const showAlert = message => {
+    setAlertMessage(message)
+    setIsAlertOpen(true)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,8 +120,9 @@ const JenisApi = () => {
       <DialogTambahJenisApi
         open={isDialogTambahOpen}
         handleClose={handleCloseDialog}
-        updateTableData={updateTableData} // Ini harus ada
+        updateTableData={updateTableData}
         data={data}
+        showAlert={showAlert}
       />
 
       <DialogHapusJenisApi
@@ -120,6 +130,10 @@ const JenisApi = () => {
         handleClose={handleCloseDialogHapus}
         jenisApiId={jenisApiIdToDelete}
         updateTableData={updateTableData}
+        showAlert={message => {
+          setAlertMessage(message)
+          setIsAlertOpen(true)
+        }}
       />
 
       <DialogEditJenisApi
@@ -128,7 +142,37 @@ const JenisApi = () => {
         jenisApiIdToEdit={jenisApiIdToEdit}
         updateTableData={updateTableData}
         data={data}
+        showAlert={message => {
+          setAlertMessage(message)
+          setIsAlertOpen(true)
+        }}
       />
+
+      <DialogTambahJenisApi
+        open={isDialogTambahOpen}
+        handleClose={handleCloseDialog}
+        updateTableData={updateTableData}
+        data={data}
+        showAlert={message => {
+          setAlertMessage(message)
+          setIsAlertOpen(true)
+        }}
+      />
+
+      <Snackbar
+        open={isAlertOpen}
+        autoHideDuration={3000} // Sesuaikan dengan durasi yang diinginkan
+        onClose={() => setIsAlertOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert
+          onClose={() => setIsAlertOpen(false)}
+          severity='success'
+          sx={{ mt: 2, position: 'fixed', bottom: 16, left: 16 }}
+        >
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   )
 }

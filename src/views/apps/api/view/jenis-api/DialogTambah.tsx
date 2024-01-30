@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField'
 import axios from 'axios'
 import { useState } from 'react'
 
-const DialogTambahJenisApi = ({ open, handleClose, updateTableData, data }: Props) => {
+const DialogTambahJenisApi = ({ open, handleClose, updateTableData, data, showAlert }: Props) => {
   const [jenisApi, setJenisApi] = useState({
     nama: '',
     deskripsi: ''
@@ -43,6 +43,8 @@ const DialogTambahJenisApi = ({ open, handleClose, updateTableData, data }: Prop
           updateTableData()
 
           handleClose()
+
+          showAlert('Data berhasil disimpan!')
         } catch (error) {
           console.error('Gagal menambahkan data:', error)
         }

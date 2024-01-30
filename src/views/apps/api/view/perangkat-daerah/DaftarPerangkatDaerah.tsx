@@ -35,6 +35,7 @@ import themeConfig from 'src/configs/themeConfig'
 
 // ** Hooks Imports
 import { useSettings } from 'src/@core/hooks/useSettings'
+import Iframe from 'react-iframe'
 
 interface DataType {
   name: string
@@ -55,84 +56,6 @@ const Transition = forwardRef(function Transition(
   return <Fade ref={ref} {...props} />
 })
 
-const data: DataType[] = [
-  {
-    avatar: '1.png',
-    value: 'Can Edit',
-    name: 'Lester Palmer',
-    email: 'pe@vogeiz.net'
-  },
-  {
-    avatar: '2.png',
-    value: 'owner',
-    name: 'Mittie Blair',
-    email: 'peromak@zukedohik.gov'
-  },
-  {
-    avatar: '3.png',
-    value: 'Can Comment',
-    name: 'Marvin Wheeler',
-    email: 'rumet@jujpejah.net'
-  },
-  {
-    avatar: '4.png',
-    value: 'Can View',
-    name: 'Nannie Ford',
-    email: 'negza@nuv.io'
-  },
-  {
-    avatar: '5.png',
-    value: 'Can Edit',
-    name: 'Julian Murphy',
-    email: 'lunebame@umdomgu.net'
-  },
-  {
-    avatar: '6.png',
-    value: 'Can View',
-    name: 'Sophie Gilbert',
-    email: 'ha@sugit.gov'
-  },
-  {
-    avatar: '7.png',
-    value: 'Can Comment',
-    name: 'Chris Watkins',
-    email: 'zokap@mak.org'
-  },
-  {
-    avatar: '8.png',
-    value: 'Can Edit',
-    name: 'Adelaide Nichols',
-    email: 'ujinomu@jigo.com'
-  }
-]
-
-const options: OptionsType[] = [
-  {
-    avatar: '1.png',
-    name: 'Chandler Bing'
-  },
-  {
-    avatar: '2.png',
-    name: 'Rachel Green'
-  },
-  {
-    avatar: '3.png',
-    name: 'Joey Tribbiani'
-  },
-  {
-    avatar: '4.png',
-    name: 'Pheobe Buffay'
-  },
-  {
-    avatar: '5.png',
-    name: 'Ross Geller'
-  },
-  {
-    avatar: '8.png',
-    name: 'Monica Geller'
-  }
-]
-
 const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   top: 0,
   right: 0,
@@ -149,39 +72,55 @@ const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
 }))
 
 const DaftarPerangkatDaerah = ({ item }) => {
-  // ** States
-  const [show, setShow] = useState<boolean>(false)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [show, setShow] = useState(false)
+  const [anchorEl, setAnchorEl] = useState(null)
 
-  // ** Hooks
-  const theme = useTheme()
-  const { settings } = useSettings()
-  const hidden = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
-
-  // ** Var
-  const { direction } = settings
-
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleMenu = event => {
     setAnchorEl(event.currentTarget)
   }
-  const handleClose = () => {
+
+  const handleCloseMenu = () => {
     setAnchorEl(null)
+  }
+
+  const handleEdit = () => {
+    // Logic untuk menangani aksi edit
+    console.log('Edit clicked for item:', item)
+    handleCloseMenu()
+  }
+
+  const handleDelete = () => {
+    // Logic untuk menangani aksi delete
+    console.log('Delete clicked for item:', item)
+    handleCloseMenu()
   }
 
   return (
     <Card>
       <CardContent sx={{ textAlign: 'center', '& svg': { mb: 2 } }}>
-        <Icon icon='tabler:file-description' fontSize='2rem' />
-        <Typography variant='h6' sx={{ mb: 4 }}>
+        <div style={{ position: 'relative', textAlign: 'right', marginTop: '-15px' }}>
+          <Button onClick={handleMenu} style={{ position: 'absolute', top: '0', right: '10px' }}>
+            <Icon icon='tabler:dots' fontSize='1.5rem' />
+          </Button>
+        </div>
+        <Icon icon='material-symbols:globe' fontSize='5rem' />
+        <Typography variant='h4' sx={{ mb: 4 }}>
           {item.nama}
         </Typography>
-        <Typography sx={{ mb: 3 }}>
-          Elegant Share Project options modal popup example, easy to use in any page.
-        </Typography>
         <Button variant='contained' onClick={() => setShow(true)}>
-          Show
+          Lihat Tampilan Website
         </Button>
       </CardContent>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MenuItem onClick={handleEdit}>Edit</MenuItem>
+        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+      </Menu>
       <Dialog
         fullWidth
         open={show}
@@ -201,134 +140,10 @@ const DaftarPerangkatDaerah = ({ item }) => {
           <CustomCloseButton onClick={() => setShow(false)}>
             <Icon icon='tabler:x' fontSize='1.25rem' />
           </CustomCloseButton>
-          <Box sx={{ mb: 4, textAlign: 'center' }}>
-            <Typography variant='h3' sx={{ mb: 3 }}>
-              Share Project
-            </Typography>
-            <Typography sx={{ color: 'text.secondary' }}>Share project with a team members</Typography>
-          </Box>
-          <CustomAutocomplete
-            autoHighlight
-            sx={{ mb: 6 }}
-            id='add-members'
-            options={options}
-            ListboxComponent={List}
-            getOptionLabel={option => option.name || ''}
-            renderInput={params => (
-              <CustomTextField {...params} label='Add Members' placeholder='Add project members...' />
-            )}
-            renderOption={(props, option) => (
-              <ListItem {...props}>
-                <ListItemAvatar>
-                  <Avatar src={`/images/avatars/${option.avatar}`} alt={option.name} sx={{ height: 28, width: 28 }} />
-                </ListItemAvatar>
-                <ListItemText primary={option.name} />
-              </ListItem>
-            )}
-          />
-          <Typography variant='h4'>{`${data.length} Members`}</Typography>
-          <List
-            dense
-            sx={{
-              mb: 3,
-              '& .MuiListItemText-primary': {
-                ...theme.typography.body1,
-                fontWeight: 500,
-                color: 'text.secondary'
-              },
-              '& .MuiListItemText-secondary': {
-                ...theme.typography.body1,
-                fontWeight: 500,
-                color: 'text.disabled'
-              }
-            }}
-          >
-            {data.map(member => {
-              return (
-                <ListItem key={member.name} sx={{ px: 0, py: 2, display: 'flex', flexWrap: 'wrap' }}>
-                  <ListItemAvatar>
-                    <Avatar src={`/images/avatars/${member.avatar}`} alt={member.name} sx={{ height: 38, width: 38 }} />
-                  </ListItemAvatar>
-                  <ListItemText sx={{ m: 0 }} primary={member.name} secondary={member.email} />
-                  <ListItemSecondaryAction sx={{ right: 0 }}>
-                    {hidden ? (
-                      <IconButton
-                        size='small'
-                        aria-haspopup='true'
-                        onClick={handleClick}
-                        aria-controls='modal-share-examples'
-                      >
-                        <Icon icon='tabler:chevron-down' fontSize={20} />
-                      </IconButton>
-                    ) : (
-                      <Fragment>
-                        <Button
-                          color='secondary'
-                          aria-haspopup='true'
-                          onClick={handleClick}
-                          sx={{ textTransform: 'capitalize' }}
-                          aria-controls='modal-share-examples'
-                          endIcon={<Icon icon='tabler:chevron-down' fontSize={20} />}
-                        >
-                          {member.value}
-                        </Button>
-                      </Fragment>
-                    )}
-                  </ListItemSecondaryAction>
-                </ListItem>
-              )
-            })}
-          </List>
-          <Box
-            sx={{
-              rowGap: 2,
-              columnGap: 4,
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', '& svg': { mr: 2 } }}>
-              <Icon icon='tabler:users' />
-              <Typography variant='h6'>{`Public to ${themeConfig.templateName} - Pixinvent`}</Typography>
-            </Box>
-            <Button variant='contained'>Copy Project Link</Button>
-          </Box>
-          <Menu
-            keepMounted
-            anchorEl={anchorEl}
-            onClose={handleClose}
-            open={Boolean(anchorEl)}
-            id='modal-share-examples'
-            anchorOrigin={{ vertical: 'bottom', horizontal: direction === 'ltr' ? 'right' : 'left' }}
-            transformOrigin={{ vertical: 'top', horizontal: direction === 'ltr' ? 'right' : 'left' }}
-          >
-            <MenuItem value='owner' sx={{ fontSize: theme => theme.typography.body2.fontSize }} onClick={handleClose}>
-              Owner
-            </MenuItem>
-            <MenuItem
-              value='Can Edit'
-              onClick={handleClose}
-              sx={{ fontSize: theme => theme.typography.body2.fontSize }}
-            >
-              Can Edit
-            </MenuItem>
-            <MenuItem
-              value='Can Comment'
-              onClick={handleClose}
-              sx={{ fontSize: theme => theme.typography.body2.fontSize }}
-            >
-              Can Comment
-            </MenuItem>
-            <MenuItem
-              value='Can View'
-              onClick={handleClose}
-              sx={{ fontSize: theme => theme.typography.body2.fontSize }}
-            >
-              Can View
-            </MenuItem>
-          </Menu>
+          <Typography variant='h4' sx={{ mb: 4 }}>
+            Tampilan Website {item.nama}
+          </Typography>
+          <Iframe url={item.url} width='100%' height='500px' />
         </DialogContent>
       </Dialog>
     </Card>

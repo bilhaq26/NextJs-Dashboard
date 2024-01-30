@@ -11,7 +11,7 @@ const navigation = (): VerticalNavItemsType => {
       badgeColor: 'error',
       children: [
         {
-          title: 'Chart',
+          title: 'Dashboard',
           path: '/dashboards/analytics'
         }
 
@@ -67,12 +67,16 @@ const navigation = (): VerticalNavItemsType => {
     //   ]
     // },
     {
-      title: 'User',
-      icon: 'tabler:user',
+      title: 'Setting',
+      icon: 'uil:setting',
       children: [
         {
           title: 'Daftar Pengguna',
           path: '/apps/user/list'
+        },
+        {
+          title: 'Daftar Api',
+          path: '/apps/api/list'
         }
 
         // {

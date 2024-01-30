@@ -77,33 +77,21 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Daftar Api',
           path: '/apps/api/list'
-        }
+        },
 
-        // {
-        //   title: 'View',
-        //   children: [
-        //     {
-        //       title: 'Account',
-        //       path: '/apps/user/view/account'
-        //     },
-        //     {
-        //       title: 'Security',
-        //       path: '/apps/user/view/security'
-        //     },
-        //     {
-        //       title: 'Billing & Plans',
-        //       path: '/apps/user/view/billing-plan'
-        //     },
-        //     {
-        //       title: 'Notifications',
-        //       path: '/apps/user/view/notification'
-        //     },
-        //     {
-        //       title: 'Connection',
-        //       path: '/apps/user/view/connection'
-        //     }
-        //   ]
-        // }
+        {
+          title: 'Ref Api',
+          children: [
+            {
+              title: 'Jenis Api',
+              path: '/apps/api/view/jenis-api'
+            },
+            {
+              title: 'Perangkat Daerah',
+              path: '/apps/api/view/perangkat-daerah'
+            }
+          ]
+        }
       ]
     }
 

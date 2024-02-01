@@ -1,12 +1,13 @@
 // ** React Imports
-import { Fragment, useEffect, useState, SyntheticEvent } from 'react'
-
-// ** Next Imports
-import { GetStaticProps, InferGetStaticPropsType } from 'next/types'
+import { Fragment, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import InputAdornment from '@mui/material/InputAdornment'
+import CustomTextField from 'src/@core/components/mui/text-field'
+import { styled } from '@mui/material/styles'
+import MuiCard, { CardProps } from '@mui/material/Card'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -15,17 +16,20 @@ import Icon from 'src/@core/components/icon'
 import axios from 'axios'
 
 // ** Demo Imports
-import ApiHeader from 'src/views/apps/api/list/HeaderApi'
 import DaftarApi from 'src/views/apps/api/list/DaftarApi'
+import CardContent from '@mui/material/CardContent'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Button from '@mui/material/Button'
 
 const Api = () => {
   // ** States
   const [data, setData] = useState([])
-  const [searchTerm, setSearchTerm] = useState<string>('')
   const [activeTab, setActiveTab] = useState<string>('payment')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filter, setFilter] = useState('')
 
   useEffect(() => {
-    // Fetch data from the API
     const fetchData = async () => {
       try {
         const response = await axios.get('http://newdashboard.bil/api/daftar-api', {
@@ -34,7 +38,6 @@ const Api = () => {
           }
         })
 
-        // Pastikan respons memiliki properti data dan data adalah array
         if (response.data && Array.isArray(response.data.data)) {
           setData(response.data.data)
         } else {
@@ -45,8 +48,18 @@ const Api = () => {
       }
     }
 
-    fetchData() // Call the fetch function
+    fetchData()
   }, [])
+
+  const handleFilterChange = value => {
+    setSearchTerm(value)
+  }
+
+  const handleFilterSelect = selectedFilter => {
+    setFilter(selectedFilter)
+  }
+
+  const filteredData = data.filter(item => item.perangkat_daerah.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const renderNoResult = (
     <Box sx={{ mt: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', '& svg': { mr: 2 } }}>
@@ -57,8 +70,43 @@ const Api = () => {
 
   return (
     <Fragment>
-      <ApiHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      {data !== null && data.length > 0 ? <DaftarApi data={data} activeTab={activeTab} /> : renderNoResult}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TextField
+            size='medium'
+            placeholder='Search a device...'
+            value={searchTerm}
+            onChange={event => handleFilterChange(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Icon fontSize='1.25rem' icon='tabler:search' />
+                </InputAdornment>
+              )
+            }}
+          />
+          <TextField
+            select
+            label='Filter'
+            size='medium'
+            value={filter}
+            onChange={event => handleFilterSelect(event.target.value)}
+            sx={{ ml: 2, width: '150px' }}
+          >
+            <MenuItem value=''>All</MenuItem>
+            <MenuItem value='filter1'>Filter 1</MenuItem>
+            <MenuItem value='filter2'>Filter 2</MenuItem>
+          </TextField>
+        </Box>
+        <Button variant='contained' color='primary'>
+          Tambah Daftar Dinas
+        </Button>
+      </Box>
+      {filteredData.length > 0 ? (
+        <DaftarApi data={filteredData} activeTab={activeTab} searchTerm={searchTerm} />
+      ) : (
+        renderNoResult
+      )}
     </Fragment>
   )
 }

@@ -17,13 +17,13 @@ import { useTheme } from '@mui/material/styles'
 import JSONPretty from 'react-json-pretty'
 import 'react-json-pretty/themes/monikai.css'
 
-const DaftarApi = ({ data, activeTab }) => {
+const DaftarApi = ({ data, activeTab, searchTerm }) => {
   const [reload, setReload] = useState(false)
   const [collapsedStates, setCollapsedStates] = useState({})
   const [visibility, setVisibility] = useState(true)
   const [apiResults, setApiResults] = useState({})
   const [loading, setLoading] = useState(false)
-  const [visibleCollapseCount, setVisibleCollapseCount] = useState(2)
+  const [visibleCollapseCount, setVisibleCollapseCount] = useState(10)
   const [showLess, setShowLess] = useState(false)
   const theme = useTheme()
 
@@ -73,14 +73,16 @@ const DaftarApi = ({ data, activeTab }) => {
     }
   }
 
+  const filteredData = data.filter(item => item.perangkat_daerah.toLowerCase().includes(searchTerm.toLowerCase()))
+
   return (
-    <Grid container spacing={10} justifyContent='center'>
-      {data.slice(0, visibleCollapseCount).map((item, index) => (
+    <Grid container spacing={3} justifyContent='center'>
+      {filteredData.slice(0, visibleCollapseCount).map((item, index) => (
         <Grid item key={index} xs={12} md={6} mt={4}>
           <Fade in={visibility} timeout={300}>
             <Card sx={{ position: 'relative', zIndex: theme.zIndex.mobileStepper - 1 }}>
               <CardHeader
-                title={item.perangkat_daerah}
+                title={`${item.perangkat_daerah}`}
                 action={
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton
@@ -127,7 +129,13 @@ const DaftarApi = ({ data, activeTab }) => {
                       <div>
                         <strong>API Key:</strong> {apiResults[item.id].data.api_key}
                       </div>
-                      <JSONPretty data={apiResults[item.id].data.slice(0, 2)} />
+                      <JSONPretty
+                        data={
+                          apiResults[item.id].data.length > 0
+                            ? apiResults[item.id].data.slice(0, 2)
+                            : { message: 'Api Tidak Ditemukan' }
+                        }
+                      />
                     </div>
                   ) : (
                     <Typography variant='body2'>Fetching data...</Typography>
@@ -156,7 +164,7 @@ const DaftarApi = ({ data, activeTab }) => {
             variant='contained'
             color='primary'
             onClick={() => {
-              setVisibleCollapseCount(prevCount => prevCount + 2)
+              setVisibleCollapseCount(prevCount => prevCount + 5)
               setShowLess(true)
             }}
           >
@@ -171,7 +179,7 @@ const DaftarApi = ({ data, activeTab }) => {
             variant='contained'
             color='secondary'
             onClick={() => {
-              setVisibleCollapseCount(2)
+              setVisibleCollapseCount(10)
               setShowLess(false)
             }}
           >

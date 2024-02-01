@@ -1,40 +1,70 @@
-// ** MUI Import
+// ** Next Import
+import Link from 'next/link'
+
+// ** MUI Imports
 import Grid from '@mui/material/Grid'
+import { styled } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
 
-// ** Demo Component Imports
-import AnalyticsProject from 'src/views/dashboards/analytics/AnalyticsProject'
-import AnalyticsOrderVisits from 'src/views/dashboards/analytics/AnalyticsOrderVisits'
-import AnalyticsWebsiteAnalyticsSlider from 'src/views/dashboards/analytics/AnalyticsWebsiteAnalyticsSlider'
+// ** Custom Components Imports
+import PageHeader from 'src/@core/components/page-header'
 
-// ** Custom Component Import
-import KeenSliderWrapper from 'src/@core/styles/libs/keen-slider'
+// ** Styled Component Import
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
-import CardStatsWithAreaChart from 'src/@core/components/card-statistics/card-stats-with-area-chart'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+
+// ** Demo Components Imports
+import ApexBarChart from 'src/views/charts/apex-charts/ApexBarChart'
+import ApexAreaChart from 'src/views/charts/apex-charts/ApexAreaChart'
+import ApexLineChart from 'src/views/charts/apex-charts/ApexLineChart'
+import ApexRadarChart from 'src/views/charts/apex-charts/ApexRadarChart'
+import ApexDonutChart from 'src/views/charts/apex-charts/ApexDonutChart'
+import ApexColumnChart from 'src/views/charts/apex-charts/ApexColumnChart'
+import ApexScatterChart from 'src/views/charts/apex-charts/ApexScatterChart'
+import ApexHeatmapChart from 'src/views/charts/apex-charts/ApexHeatmapChart'
+import ApexRadialBarChart from 'src/views/charts/apex-charts/ApexRadialBarChart'
+import ApexCandlestickChart from 'src/views/charts/apex-charts/ApexCandlestickChart'
+
+const LinkStyled = styled(Link)(({ theme }) => ({
+  textDecoration: 'none',
+  color: theme.palette.primary.main
+}))
 
 const AnalyticsDashboard = () => {
   return (
     <ApexChartWrapper>
-      <KeenSliderWrapper>
-        <Grid container spacing={6}>
-          <Grid item xs={12} lg={6}>
-            <AnalyticsWebsiteAnalyticsSlider />
+      <DatePickerWrapper>
+        <Grid container spacing={6} className='match-height'>
+          <PageHeader
+            title={
+              <Typography variant='h4'>
+                <LinkStyled href='https://github.com/apexcharts/react-apexcharts' target='_blank'>
+                  React ApexCharts
+                </LinkStyled>
+              </Typography>
+            }
+            subtitle={<Typography sx={{ color: 'text.secondary' }}>React Component for ApexCharts</Typography>}
+          />
+          <Grid item xs={12}>
+            <ApexAreaChart />
           </Grid>
-          <Grid item xs={12} sm={6} lg={3}>
-            <AnalyticsOrderVisits />
+          <Grid item xs={12}>
+            <ApexLineChart />
           </Grid>
-          <Grid item xs={12} sm={6} lg={3}>
-            <CardStatsWithAreaChart
-              stats='97.5k'
-              chartColor='success'
-              avatarColor='success'
-              title='Revenue Generated'
-              avatarIcon='tabler:credit-card'
-              chartSeries={[{ data: [6, 35, 25, 61, 32, 84, 70] }]}
-            />
+          <Grid item xs={12} md={6}>
+            <ApexBarChart />
           </Grid>
-          <AnalyticsProject />
+          <Grid item xs={12} md={6}>
+            <ApexRadialBarChart />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ApexRadarChart />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ApexDonutChart />
+          </Grid>
         </Grid>
-      </KeenSliderWrapper>
+      </DatePickerWrapper>
     </ApexChartWrapper>
   )
 }

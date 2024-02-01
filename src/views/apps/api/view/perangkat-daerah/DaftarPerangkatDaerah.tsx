@@ -1,53 +1,22 @@
 // ** React Imports
-import { Ref, useState, forwardRef, ReactElement, MouseEvent, Fragment } from 'react'
+import { Ref, useState, forwardRef, ReactElement } from 'react'
 
 // ** MUI Imports
-import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import List from '@mui/material/List'
 import Menu from '@mui/material/Menu'
-import Avatar from '@mui/material/Avatar'
 import Dialog from '@mui/material/Dialog'
 import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
-import ListItem from '@mui/material/ListItem'
 import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import Fade, { FadeProps } from '@mui/material/Fade'
-import ListItemText from '@mui/material/ListItemText'
-import { Theme, useTheme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import DialogContent from '@mui/material/DialogContent'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
 import IconButton, { IconButtonProps } from '@mui/material/IconButton'
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
-
-// ** Custom Component Imports
-import CustomTextField from 'src/@core/components/mui/text-field'
-import CustomAutocomplete from 'src/@core/components/mui/autocomplete'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
-
-// ** Configs Imports
-import themeConfig from 'src/configs/themeConfig'
-
-// ** Hooks Imports
-import { useSettings } from 'src/@core/hooks/useSettings'
 import Iframe from 'react-iframe'
-
-interface DataType {
-  name: string
-  email: string
-  value: string
-  avatar: string
-}
-
-interface OptionsType {
-  name: string
-  avatar: string
-}
 
 const Transition = forwardRef(function Transition(
   props: FadeProps & { children?: ReactElement<any, any> },
@@ -71,7 +40,7 @@ const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   }
 }))
 
-const DaftarPerangkatDaerah = ({ item }) => {
+const DaftarPerangkatDaerah = ({ item, handleEditClick, handleDeleteClick }) => {
   const [show, setShow] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
 
@@ -84,14 +53,12 @@ const DaftarPerangkatDaerah = ({ item }) => {
   }
 
   const handleEdit = () => {
-    // Logic untuk menangani aksi edit
-    console.log('Edit clicked for item:', item)
+    handleEditClick(item.id) // Panggil fungsi handleEditClick dengan mengirimkan item yang akan di-edit
     handleCloseMenu()
   }
 
   const handleDelete = () => {
-    // Logic untuk menangani aksi delete
-    console.log('Delete clicked for item:', item)
+    handleDeleteClick(item.id) // Panggil fungsi handleDeleteClick dengan mengirimkan item yang akan di-delete
     handleCloseMenu()
   }
 

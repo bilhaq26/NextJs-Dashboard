@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -19,6 +19,12 @@ const DialogEditJenisApi = ({
   const [editedData, setEditedData] = useState({
     nama: data ? data.nama : ''
   })
+
+  useEffect(() => {
+    setEditedData({
+      nama: data ? data.nama : ''
+    })
+  }, [data])
 
   const handleChange = e => {
     setEditedData({

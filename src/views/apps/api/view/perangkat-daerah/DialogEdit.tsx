@@ -36,6 +36,9 @@ const DialogEditPerangkatDaerah = ({ open, handleClose, dataPerangkat, showAlert
       // Remove "https://" if user manually deletes it
       updatedValue = value.replace(/^https?:\/\//i, '')
 
+      // Remove "/" from the end of URL
+      updatedValue = updatedValue.replace(/\/$/, '')
+
       // Add "https://" to the beginning if not already present
       if (updatedValue && !/^https?:\/\//i.test(updatedValue)) {
         updatedValue = 'https://' + updatedValue

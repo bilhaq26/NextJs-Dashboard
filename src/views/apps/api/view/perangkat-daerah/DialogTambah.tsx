@@ -40,6 +40,9 @@ const DialogTambahPerangkatDaerah = ({ open, handleClose, dataPerangkat, showAle
       // Hilangkan "https://" jika pengguna menghapus manual
       value = value.replace(/^https?:\/\//i, '')
 
+      // Hilangkan "/" dari akhir URL
+      value = value.replace(/\/$/, '')
+
       // Tambahkan "https://" ke awal jika tidak sudah ada
       if (value && !/^https?:\/\//i.test(value)) {
         value = 'https://' + value

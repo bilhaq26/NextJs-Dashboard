@@ -138,7 +138,7 @@ const DaftarApi = ({ data, activeTab, searchTerm }) => {
                       />
                     </div>
                   ) : (
-                    <Typography variant='body2'>Fetching data...</Typography>
+                    <JSONPretty data={{ message: 'Api Tidak Ditemukan' }} />
                   )}
                 </CardContent>
 

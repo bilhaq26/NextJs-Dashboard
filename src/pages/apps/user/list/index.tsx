@@ -151,6 +151,13 @@ const User = () => {
         }
       })
 
+      if (response.status === 429) {
+        // Menunggu beberapa saat sebelum mencoba lagi
+        setTimeout(() => {
+          handleAddSave()
+        }, 5000) // Contoh: Menunggu 5 detik sebelum mencoba lagi
+      }
+
       // Check if the API response contains an error
       if (response.data.status === 'error') {
         console.error('Error adding user:', response.data.message)

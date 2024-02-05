@@ -4,14 +4,59 @@ import CardHeader from '@mui/material/CardHeader'
 import Grid from '@mui/material/Grid'
 import Snackbar from '@mui/material/Snackbar'
 import axios from 'axios'
-import { SetStateAction, useEffect, useState } from 'react'
+import { ReactElement, Ref, forwardRef, useEffect, useState } from 'react'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from 'src/@core/components/mui/text-field'
-import DaftarPerangkatDaerah from 'src/views/apps/api/view/perangkat-daerah/DaftarPerangkatDaerah'
 import DialogTambahPerangkatDaerah from 'src/views/apps/api/view/perangkat-daerah/DialogTambah'
-import { InputAdornment } from '@mui/material'
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  Fade,
+  FadeProps,
+  IconButton,
+  IconButtonProps,
+  InputAdornment,
+  Typography,
+  styled
+} from '@mui/material'
 import DialogEditPerangkatDaerah from 'src/views/apps/api/view/perangkat-daerah/DialogEdit'
 import DialogDeletePerangkatDaerah from 'src/views/apps/api/view/perangkat-daerah/DialogDelete'
+import { DataGrid, GridColDef, GridRowId } from '@mui/x-data-grid'
+import { InvoiceType } from 'src/types/apps/invoiceTypes'
+import Link from 'next/link'
+import Iframe from 'react-iframe'
+
+const Transition = forwardRef(function Transition(
+  props: FadeProps & { children?: ReactElement<any, any> },
+  ref: Ref<unknown>
+) {
+  return <Fade ref={ref} {...props} />
+})
+interface CellType {
+  row: InvoiceType
+}
+
+const LinkStyled = styled(Link)(({ theme }) => ({
+  textDecoration: 'none',
+  fontSize: theme.typography.body1.fontSize,
+  color: `${theme.palette.primary.main} !important`
+}))
+
+const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
+  top: 0,
+  right: 0,
+  color: 'grey.500',
+  position: 'absolute',
+  boxShadow: theme.shadows[2],
+  transform: 'translate(10px, -10px)',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: `${theme.palette.background.paper} !important`,
+  transition: 'transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out',
+  '&:hover': {
+    transform: 'translate(7px, -5px)'
+  }
+}))
 
 const PerangkatDaerah = () => {
   const [dataPerangkat, setDataPerangkat] = useState([])
@@ -23,6 +68,9 @@ const PerangkatDaerah = () => {
   const [AlertMessage, setAlertMessage] = useState('')
   const [alertSeverity, setAlertSeverity] = useState('success')
   const [filter, setFilter] = useState('')
+  const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
+  const [showUrl, setShowUrl] = useState({ open: false, data: null })
 
   const handleFilterChange = event => {
     setFilter(event.target.value)
@@ -56,6 +104,11 @@ const PerangkatDaerah = () => {
     setDialogDeleteOpen(false)
   }
 
+  const handleShowUrl = id => {
+    const selectedRow = dataPerangkat.find(row => row.id === id)
+    setShowUrl({ open: true, data: selectedRow })
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,6 +140,56 @@ const PerangkatDaerah = () => {
     }
   }
 
+  const columns: GridColDef[] = [
+    {
+      flex: 0.1,
+      minWidth: 100,
+      field: 'No',
+      headerName: 'ID',
+      renderCell: (params: CellParams) => {
+        const rowNumber = dataPerangkat.indexOf(params.row) + 1
+
+        return (
+          <Typography component={LinkStyled} target='_blank' href={`${params.row.url}`}>
+            {rowNumber}
+          </Typography>
+        )
+      }
+    },
+    {
+      flex: 0.25,
+      field: 'nama',
+      minWidth: 520,
+      headerName: 'Nama Perangkat',
+      renderCell: ({ row }: CellType) => (
+        <Box>
+          <Typography noWrap>{row.nama}</Typography>
+        </Box>
+      )
+    },
+
+    // tambahkan titik 3 untuk menampilkan edit dan delete
+    {
+      flex: 0.25,
+      minWidth: 50,
+      field: 'actions',
+      headerName: 'Aksi',
+      renderCell: ({ row }: CellType) => (
+        <Box>
+          <Button>
+            <Icon icon='solar:eye-broken' onClick={() => handleShowUrl(row.id)} />
+          </Button>
+          <Button color='secondary' onClick={() => handleEditClick(row.id)}>
+            <Icon icon='flowbite:edit-outline' />
+          </Button>
+          <Button color='error' onClick={() => handleDeleteClick(row.id)}>
+            <Icon icon='fluent:delete-20-regular' />
+          </Button>
+        </Box>
+      )
+    }
+  ]
+
   return (
     <>
       <CardHeader
@@ -113,18 +216,22 @@ const PerangkatDaerah = () => {
           </div>
         }
       />
-      <Grid container spacing={6} className='match-height'>
-        {(dataPerangkat || [])
-          .filter(item => item.nama.toLowerCase().includes(filter.toLowerCase()))
-          .map((item, index) => (
-            <Grid key={index} item md={4} sm={6} xs={12}>
-              <DaftarPerangkatDaerah
-                item={item}
-                handleEditClick={handleEditClick}
-                handleDeleteClick={handleDeleteClick}
-              />
-            </Grid>
-          ))}
+      <Grid container spacing={6} className='match-height pt-2'>
+        <Box width='100%'>
+          <DataGrid
+            autoHeight
+            pagination
+            rowHeight={62}
+            rows={dataPerangkat}
+            columns={columns}
+            checkboxSelection
+            disableRowSelectionOnClick
+            pageSizeOptions={[10, 25, 50]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            onRowSelectionModelChange={rows => setSelectedRows(rows)}
+          />
+        </Box>
       </Grid>
 
       <DialogTambahPerangkatDaerah
@@ -150,6 +257,32 @@ const PerangkatDaerah = () => {
         showAlert={showAlert}
         updateTableData={updateTableData}
       />
+
+      <Dialog
+        fullWidth
+        open={showUrl.open}
+        maxWidth='md'
+        scroll='body'
+        onClose={() => setShowUrl({ open: false, data: null })}
+        TransitionComponent={Transition}
+        onBackdropClick={() => setShowUrl({ open: false, data: null })}
+        sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+      >
+        <DialogContent
+          sx={{
+            px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
+            py: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
+          }}
+        >
+          <CustomCloseButton onClick={() => setShowUrl({ open: false, data: null })}>
+            <Icon icon='tabler:x' fontSize='1.25rem' />
+          </CustomCloseButton>
+          <Typography variant='h4' sx={{ mb: 4 }}>
+            Tampilan Website {showUrl.data?.nama || ''}
+          </Typography>
+          {showUrl.data && <Iframe url={showUrl.data.url} width='100%' height='500px' />}
+        </DialogContent>
+      </Dialog>
 
       {isAlertOpen && (
         <Snackbar

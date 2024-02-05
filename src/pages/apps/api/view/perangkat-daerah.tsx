@@ -22,7 +22,7 @@ import {
 } from '@mui/material'
 import DialogEditPerangkatDaerah from 'src/views/apps/api/view/perangkat-daerah/DialogEdit'
 import DialogDeletePerangkatDaerah from 'src/views/apps/api/view/perangkat-daerah/DialogDelete'
-import { DataGrid, GridColDef, GridRowId } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridRowId, CellParams } from '@mui/x-data-grid'
 import { InvoiceType } from 'src/types/apps/invoiceTypes'
 import Link from 'next/link'
 import Iframe from 'react-iframe'

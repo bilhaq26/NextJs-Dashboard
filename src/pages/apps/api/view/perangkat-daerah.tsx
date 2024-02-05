@@ -67,13 +67,13 @@ const PerangkatDaerah = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
   const [AlertMessage, setAlertMessage] = useState('')
   const [alertSeverity, setAlertSeverity] = useState('success')
-  const [filter, setFilter] = useState('')
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [showUrl, setShowUrl] = useState({ open: false, data: null })
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const handleFilterChange = event => {
-    setFilter(event.target.value)
+  const handleSearchChange = event => {
+    setSearchQuery(event.target.value)
   }
 
   const showAlert = (message, isSuccess) => {
@@ -119,13 +119,18 @@ const PerangkatDaerah = () => {
         })
 
         // response not array
-        setDataPerangkat(response.data.data)
+        const filteredData = response.data.data.filter(item =>
+          item.nama.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+
+        setDataPerangkat(filteredData)
       } catch (error) {
         console.error('Error fetching data from API:', error)
       }
     }
+
     fetchData()
-  }, [])
+  }, [searchQuery])
 
   const updateTableData = async () => {
     try {
@@ -192,31 +197,30 @@ const PerangkatDaerah = () => {
 
   return (
     <>
-      <CardHeader
-        title='Daftar Perangkat Dinas'
-        action={
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <CustomTextField
-              variant='outlined'
-              size='small'
-              value={filter}
-              onChange={handleFilterChange}
-              placeholder='Cari...'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <Icon icon='lets-icons:search-alt-fill' />
-                  </InputAdornment>
-                )
-              }}
-            />
-            <Button variant='contained' onClick={handleDialogTambah} color='primary' style={{ marginLeft: '8px' }}>
-              <Icon icon='ph:plus-fill' /> Tambah Jenis Api
-            </Button>
-          </div>
-        }
-      />
       <Grid container spacing={6} className='match-height pt-2'>
+        <CardHeader
+          action={
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Button variant='contained' onClick={handleDialogTambah} color='primary'>
+                <Icon icon='ph:plus-fill' />
+              </Button>
+              <CustomTextField
+                style={{ marginLeft: '8px' }}
+                variant='outlined'
+                fullWidth
+                value={searchQuery}
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <Icon icon='bi:search' />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </div>
+          }
+        />
         <Box width='100%'>
           <DataGrid
             autoHeight

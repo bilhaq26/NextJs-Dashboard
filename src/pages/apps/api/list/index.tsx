@@ -76,13 +76,13 @@ const Api = () => {
             size='medium'
             placeholder='Search a device...'
             value={searchTerm}
-            onChange={event => handleFilterChange(event.target.value)}
+            onChange={(event) => handleFilterChange(event.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position='start'>
                   <Icon fontSize='1.25rem' icon='tabler:search' />
                 </InputAdornment>
-              )
+              ),
             }}
           />
           <TextField
@@ -90,7 +90,7 @@ const Api = () => {
             label='Filter'
             size='medium'
             value={filter}
-            onChange={event => handleFilterSelect(event.target.value)}
+            onChange={(event) => handleFilterSelect(event.target.value)}
             sx={{ ml: 2, width: '150px' }}
           >
             <MenuItem value=''>All</MenuItem>

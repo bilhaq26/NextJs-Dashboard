@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -8,7 +8,6 @@ import Fade from '@mui/material/Fade'
 import IconButton from '@mui/material/IconButton'
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
-import Typography from '@mui/material/Typography'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import Button from '@mui/material/Button'
@@ -17,7 +16,7 @@ import { useTheme } from '@mui/material/styles'
 import JSONPretty from 'react-json-pretty'
 import 'react-json-pretty/themes/monikai.css'
 
-const DaftarApi = ({ data, activeTab, searchTerm }) => {
+const DaftarApi = ({ data, activeTab, searchTerm, updateTableData, handleDeleteClick, handleEditClick }) => {
   const [reload, setReload] = useState(false)
   const [collapsedStates, setCollapsedStates] = useState({})
   const [visibility, setVisibility] = useState(true)
@@ -25,21 +24,26 @@ const DaftarApi = ({ data, activeTab, searchTerm }) => {
   const [loading, setLoading] = useState(false)
   const [visibleCollapseCount, setVisibleCollapseCount] = useState(10)
   const [showLess, setShowLess] = useState(false)
+  const [reloadInProgress, setReloadInProgress] = useState(false)
+  const [reloadingItem, setReloadingItem] = useState(null)
   const theme = useTheme()
 
-  const handleBackDrop = () => {
-    setLoading(true)
+  const handleBackDrop = async () => {
+    setReloadInProgress(true)
 
-    setTimeout(() => {
-      setReload(false)
-      Object.keys(apiResults).forEach(itemId => fetchDataForItem(itemId, data.url, data.endpoint, data.api_key, true))
-      setLoading(false)
-    }, 2000)
+    try {
+      await Promise.all(
+        filteredData.map(item => fetchDataForItem(item.id, item.url, item.endpoint, item.api_key, true))
+      )
+    } finally {
+      setReloadInProgress(false)
+    }
   }
 
   const fetchDataForItem = async (itemId, itemUrl, itemEndpoint, itemApiKey, forceRefresh = false) => {
     try {
-      setLoading(true)
+      setReloadingItem(itemId) // Set state untuk menandakan bahwa item ini sedang dimuat ulang
+
       const fullUrl = `${itemUrl}${itemEndpoint}`
       console.log('Full URL:', fullUrl)
 
@@ -58,7 +62,7 @@ const DaftarApi = ({ data, activeTab, searchTerm }) => {
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
-      setLoading(false)
+      setReloadingItem(null) // Set state untuk menandakan bahwa pembaruan sudah selesai
     }
   }
 
@@ -99,28 +103,51 @@ const DaftarApi = ({ data, activeTab, searchTerm }) => {
                     <IconButton
                       size='small'
                       aria-label='reload'
-                      onClick={() => handleBackDrop()}
+                      onClick={handleBackDrop}
                       sx={{ mr: 2, color: 'text.secondary' }}
                     >
-                      <Icon icon='tabler:reload' fontSize={20} />
+                      {reloadInProgress ? (
+                        <CircularProgress size={20} color='inherit' />
+                      ) : (
+                        <Icon icon='tabler:reload' fontSize={20} />
+                      )}
+                    </IconButton>
+                    <IconButton
+                      size='small'
+                      aria-label='delete'
+                      onClick={() => handleDeleteClick(item.id)}
+                      sx={{ mr: 2, color: 'error.main' }}
+                    >
+                      <Icon fontSize={20} icon='tabler:trash' />
+                    </IconButton>
+                    <IconButton
+                      size='small'
+                      aria-label='edit'
+                      onClick={() => handleEditClick(item.id)}
+                      sx={{ mr: 2, color: 'primary.main' }}
+                    >
+                      <Icon fontSize={20} icon='tabler:pencil' />
                     </IconButton>
                   </Box>
                 }
               />
               <Collapse in={collapsedStates[item.id]}>
                 <CardContent>
-                  {loading ? (
+                  {/* Menampilkan CircularProgress hanya jika item sedang dimuat ulang */}
+                  {reloadingItem === item.id && apiResults[item.id]?.loading && (
                     <Backdrop
-                      open={loading}
+                      open={true}
                       sx={{
                         position: 'absolute',
                         color: 'common.white',
-                        zIndex: theme.zIndex.mobileStepper - 1
+                        zIndex: theme.zIndex.mobileStepper - 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)' // Menambahkan latar belakang transparan
                       }}
                     >
                       <CircularProgress color='inherit' />
                     </Backdrop>
-                  ) : apiResults[item.id] ? (
+                  )}
+                  {apiResults[item.id] ? (
                     <div>
                       <div>
                         <strong>URL:</strong> {apiResults[item.id].url}
@@ -143,11 +170,12 @@ const DaftarApi = ({ data, activeTab, searchTerm }) => {
                 </CardContent>
 
                 <Backdrop
-                  open={reload}
+                  open={reloadInProgress || reloadingItem !== null}
                   sx={{
                     position: 'absolute',
                     color: 'common.white',
-                    zIndex: theme.zIndex.mobileStepper - 1
+                    zIndex: theme.zIndex.mobileStepper - 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)' // Menambahkan latar belakang transparan
                   }}
                 >
                   <CircularProgress color='inherit' />

@@ -26,7 +26,6 @@ const DaftarApi = ({ data, activeTab, searchTerm }) => {
   const [visibleCollapseCount, setVisibleCollapseCount] = useState(10)
   const [showLess, setShowLess] = useState(false)
   const theme = useTheme()
-  
 
   const handleBackDrop = () => {
     setLoading(true)

@@ -1,5 +1,5 @@
 // ** React Imports
-import { forwardRef, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
@@ -22,19 +22,73 @@ import { DateType } from 'src/types/forms/reactDatepickerTypes'
 // ** Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
+import axios from 'axios'
 
 interface PickerProps {
   start: Date | number
   end: Date | number
 }
 
-const ApexBarChart = ({data}) => {
+const ChartBarVisitor = ({data}) => {
   // ** States
   const [endDate, setEndDate] = useState<DateType>(null)
   const [startDate, setStartDate] = useState<DateType>(null)
+  const [barChartData, setbarChartData] = useState([]);
 
   // ** Hook
   const theme = useTheme()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const newData = await Promise.all(
+          data.map(async (item) => {
+            const fullUrl = item.url + item.endpoint;
+            const response = await axios.get(fullUrl, {
+              headers: {
+                key: item.api_key
+              }
+            });
+  
+            const resData = response.data;
+  
+            // Filter data berdasarkan rentang tanggal jika startDate dan endDate terdefinisi
+            let filteredData = resData;
+            if (startDate && endDate) {
+              filteredData = resData.filter((dataItem) => {
+                const date = new Date(dataItem.date);
+                return date >= startDate && date <= endDate;
+              });
+            }
+  
+            // Mengambil data terakhir dari filteredData
+            const lastData = filteredData.length > 0 ? filteredData[filteredData.length - 1] : null;
+  
+            return {
+              name: item.perangkat_daerah,
+              value: lastData ? lastData.count : 0, // Menggunakan nilai count atau default 0 jika tidak ada data terakhir
+              date: lastData ? lastData.date : null
+            };
+          })
+        );
+  
+        // Urutkan newData berdasarkan nilai dari yang terbesar
+        newData.sort((a, b) => b.value - a.value);
+  
+        // Ambil 5 data pertama
+        const top5Data = newData.slice(0, 5);
+  
+        setbarChartData(top5Data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setbarChartData([]);
+      }
+    };
+  
+    fetchData();
+  }, [data, startDate, endDate]);
+
+  console.log('barChartData:', barChartData);
 
   const options: ApexOptions = {
     chart: {
@@ -68,7 +122,7 @@ const ApexBarChart = ({data}) => {
     xaxis: {
       axisBorder: { show: false },
       axisTicks: { color: theme.palette.divider },
-      categories: ['MON, 11', 'THU, 14', 'FRI, 15', 'MON, 18', 'WED, 20', 'FRI, 21', 'MON, 23'],
+      categories: data.map(item => item.perangkat_daerah),
       labels: {
         style: { colors: theme.palette.text.disabled }
       }
@@ -108,11 +162,13 @@ const ApexBarChart = ({data}) => {
     setEndDate(end)
   }
 
+  const seriesData = barChartData.map(item => item.value);
+
   return (
     <Card>
       <CardHeader
-        title='Data Science'
-        subheader='$74,382.72'
+        title='Pengunjung Website Terbanyak'
+        subheader='Daftar 5 Website dengan pengunjung terbanyak hari ini'
         sx={{
           flexDirection: ['column', 'row'],
           alignItems: ['flex-start', 'center'],
@@ -127,7 +183,7 @@ const ApexBarChart = ({data}) => {
             selected={startDate}
             startDate={startDate}
             onChange={handleOnChange}
-            placeholderText='Click to select a date'
+            placeholderText='Pilih tanggal'
             customInput={<CustomInput start={startDate as Date | number} end={endDate as Date | number} />}
           />
         }
@@ -137,11 +193,11 @@ const ApexBarChart = ({data}) => {
           type='bar'
           height={400}
           options={options}
-          series={[{ data: [700, 350, 480, 600, 210, 550, 150] }]}
+          series={[{ data: seriesData }]}
         />
       </CardContent>
     </Card>
   )
 }
 
-export default ApexBarChart
+export default ChartBarVisitor

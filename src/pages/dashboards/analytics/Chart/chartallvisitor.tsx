@@ -28,18 +28,21 @@ import ReactApexcharts from 'src/@core/components/react-apexcharts'
 import axios from 'axios'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
+import CircularProgress from '@mui/material/CircularProgress'
+import Backdrop from '@mui/material/Backdrop'
 
 interface PickerProps {
   start: Date | number
   end: Date | number
 }
 
-const ApexAreaChart = ({ data }) => {
+const ChartAllVisitor = ({ data }) => {
   // ** States
   const [endDate, setEndDate] = useState<DateType>(null)
   const [startDate, setStartDate] = useState<DateType>(null)
   const [series, setSeries] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState('');
+  const [loading, setLoading] = useState(true);
   const [areaColors, setAreaColors] = useState({
     series1: '#ab7efd',
     series2: '#b992fe',
@@ -60,7 +63,6 @@ const ApexAreaChart = ({ data }) => {
   const theme = useTheme()
 
   const newData = [];
-  console.log('data', newData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,14 +95,14 @@ const ApexAreaChart = ({ data }) => {
       } catch (error) {
         console.error('Error fetching data:', error);
         setSeries([]);
+      } finally {
+        setLoading(false);
       }
+      
     };
 
     fetchData();
   }, [data, selectedDevice]);
-  
-
-  console.log('series', series);
 
   const options: ApexOptions = {
     chart: {
@@ -176,14 +178,33 @@ const ApexAreaChart = ({ data }) => {
         }}
       />
       <CardContent>
-      {series && series.length > 0 && series[0].data ? (
-          <ReactApexcharts type='area' height={400} options={options} series={series} />
+        {loading ? (
+        <Backdrop
+          open={true}
+          sx={{
+            position: 'absolute',
+            color: 'common.white',
+            zIndex: theme.zIndex.mobileStepper - 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)' // Menambahkan latar belakang transparan
+          }}
+          >
+          <CircularProgress color='inherit' />
+        </Backdrop>
         ) : (
-          <div>Data tidak tersedia.</div>
+          series && series.length > 0 && series[0].data ? (
+            <ReactApexcharts
+              type='area'
+              height={400}
+              options={options}
+              series={series.map(item => ({ data: item.data, color: item.color }))}
+            />
+          ) : (
+            <div>Data tidak tersedia.</div>
+          )
         )}
       </CardContent>
     </Card>
   )
 }
 
-export default ApexAreaChart
+export default ChartAllVisitor

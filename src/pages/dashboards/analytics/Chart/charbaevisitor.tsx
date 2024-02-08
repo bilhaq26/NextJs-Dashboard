@@ -23,6 +23,7 @@ import { DateType } from 'src/types/forms/reactDatepickerTypes'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 import axios from 'axios'
+import Alert from '@mui/material/Alert'
 
 interface PickerProps {
   start: Date | number
@@ -31,9 +32,11 @@ interface PickerProps {
 
 const ChartBarVisitor = ({data}) => {
   // ** States
-  const [endDate, setEndDate] = useState<DateType>(null)
-  const [startDate, setStartDate] = useState<DateType>(null)
-  const [barChartData, setbarChartData] = useState([]);
+  const [endDate, setEndDate] = useState<DateType>(null);
+  const [startDate, setStartDate] = useState<DateType>(null);
+  const [barChartData, setBarChartData] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   // ** Hook
   const theme = useTheme()
@@ -46,13 +49,12 @@ const ChartBarVisitor = ({data}) => {
             const fullUrl = item.url + item.endpoint;
             const response = await axios.get(fullUrl, {
               headers: {
-                key: item.api_key
-              }
+                key: item.api_key,
+              },
             });
-  
+
             const resData = response.data;
-  
-            // Filter data berdasarkan rentang tanggal jika startDate dan endDate terdefinisi
+
             let filteredData = resData;
             if (startDate && endDate) {
               filteredData = resData.filter((dataItem) => {
@@ -60,35 +62,32 @@ const ChartBarVisitor = ({data}) => {
                 return date >= startDate && date <= endDate;
               });
             }
-  
-            // Mengambil data terakhir dari filteredData
-            const lastData = filteredData.length > 0 ? filteredData[filteredData.length - 1] : null;
-  
+
+            const lastData =
+              filteredData.length > 0
+                ? filteredData[filteredData.length - 1]
+                : null;
+
             return {
               name: item.perangkat_daerah,
-              value: lastData ? lastData.count : 0, // Menggunakan nilai count atau default 0 jika tidak ada data terakhir
-              date: lastData ? lastData.date : null
+              value: lastData ? lastData.count : 0,
+              date: lastData ? lastData.date : null,
             };
           })
         );
-  
-        // Urutkan newData berdasarkan nilai dari yang terbesar
+
         newData.sort((a, b) => b.value - a.value);
-  
-        // Ambil 5 data pertama
         const top5Data = newData.slice(0, 5);
-  
-        setbarChartData(top5Data);
+
+        setBarChartData(top5Data);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setbarChartData([]);
+        setBarChartData([]);
       }
     };
-  
+
     fetchData();
   }, [data, startDate, endDate]);
-
-  console.log('barChartData:', barChartData);
 
   const options: ApexOptions = {
     chart: {
@@ -130,10 +129,12 @@ const ChartBarVisitor = ({data}) => {
   }
 
   const CustomInput = forwardRef((props: PickerProps, ref) => {
-    const startDate = props.start !== null ? format(props.start, 'MM/dd/yyyy') : ''
-    const endDate = props.end !== null ? ` - ${format(props.end, 'MM/dd/yyyy')}` : null
+    const startDate =
+      props.start !== null ? format(props.start, 'MM/dd/yyyy') : '';
+    const endDate =
+      props.end !== null ? ` - ${format(props.end, 'MM/dd/yyyy')}` : null;
 
-    const value = `${startDate}${endDate !== null ? endDate : ''}`
+    const value = `${startDate}${endDate !== null ? endDate : ''}`;
 
     return (
       <CustomTextField
@@ -150,17 +151,26 @@ const ChartBarVisitor = ({data}) => {
             <InputAdornment position='end'>
               <Icon fontSize='1.25rem' icon='tabler:chevron-down' />
             </InputAdornment>
-          )
+          ),
         }}
       />
-    )
-  })
+    );
+  });
 
   const handleOnChange = (dates: any) => {
-    const [start, end] = dates
-    setStartDate(start)
-    setEndDate(end)
-  }
+    const [start, end] = dates;
+
+    const today = new Date();
+    if (end && end > today) {
+      setShowAlert(true);
+      setAlertMessage('Tanggal akhir tidak boleh melewati hari ini');
+      return;
+    }
+
+    setStartDate(start);
+    setEndDate(end);
+    setShowAlert(false);
+  };
 
   const seriesData = barChartData.map(item => item.value);
 
@@ -173,7 +183,7 @@ const ChartBarVisitor = ({data}) => {
           flexDirection: ['column', 'row'],
           alignItems: ['flex-start', 'center'],
           '& .MuiCardHeader-action': { mb: 0 },
-          '& .MuiCardHeader-content': { mb: [2, 0] }
+          '& .MuiCardHeader-content': { mb: [2, 0] },
         }}
         action={
           <DatePicker
@@ -189,6 +199,9 @@ const ChartBarVisitor = ({data}) => {
         }
       />
       <CardContent>
+        {showAlert && (
+          <Alert severity='error'>{alertMessage}</Alert>
+        )}
         <ReactApexcharts
           type='bar'
           height={400}
@@ -197,7 +210,7 @@ const ChartBarVisitor = ({data}) => {
         />
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export default ChartBarVisitor

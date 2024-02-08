@@ -23,6 +23,7 @@ import MuiCard, { CardProps } from '@mui/material/Card'
 import ChartAllVisitor from './Chart/chartallvisitor'
 import ChartDonutVisitor from './Chart/chartdonutvisitor'
 import ChartBarVisitor from './Chart/charbaevisitor'
+import WebsiteStatistic from './Component/websitestatistik'
 
 const Card = styled(MuiCard)<CardProps>(() => ({
   border: 0,
@@ -60,22 +61,24 @@ const AnalyticsDashboard = () => {
 
     fetchData()
   }, [])
-
   return (
     <ApexChartWrapper>
       <DatePickerWrapper>
         <Grid container spacing={6} className='match-height'>
           <Grid item xs={12}>
-          <Card>
-            <CardContent sx={{ pt: 26, textAlign: 'center', pb: theme => `${theme.spacing(24)} !important` }}>
-              <Typography sx={{ mb: 4, fontWeight: 500, fontSize: '1.625rem', lineHeight: 1.385 }}>
-                DASHBOARD WEBSITE 
-              </Typography>
-              <Typography sx={{ mt: 4, color: 'text.secondary' }}>
-              PERANGKAT DAERAH DAN DESA KABUPATEN OGAN ILIR
-              </Typography>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardContent sx={{ pt: 26, textAlign: 'center', pb: theme => `${theme.spacing(24)} !important` }}>
+                <Typography sx={{ mb: 4, fontWeight: 500, fontSize: '1.625rem', lineHeight: 1.385 }}>
+                  DASHBOARD WEBSITE
+                </Typography>
+                <Typography sx={{ mt: 4, color: 'text.secondary' }}>
+                PERANGKAT DAERAH DAN DESA KABUPATEN OGAN ILIR
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={12}>
+          <WebsiteStatistic data={data} jenisApiOptions={jenisApiOptions}/>
           </Grid>
           <Grid item xs={12}>
             <ChartAllVisitor data={data} jenisApiOptions={jenisApiOptions}  />

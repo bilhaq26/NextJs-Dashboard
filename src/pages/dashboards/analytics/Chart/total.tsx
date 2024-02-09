@@ -161,7 +161,6 @@ const JumlahTotal = () => {
               <ReactApexcharts type='donut' width={150} height={165} series={updatedSeries} options={options} />
             </Box>
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
-              <Lottie options={lottieOptions} height={'100%'} width={'100%'} />
             </div>
           </div>
         )}

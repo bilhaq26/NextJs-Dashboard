@@ -15,11 +15,10 @@ import axios from 'axios'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import MuiCard, { CardProps } from '@mui/material/Card'
-import JumlahOpd from './Chart/opd'
-import JumlahKecamatan from './Chart/kecamata'
-import JumlahKelurahan from './Chart/kelurahan'
-import JumlahDesa from './Chart/desa'
-import JumlahTotal from './Chart/total'
+import ChartAllVisitor from '../pengunjung/Chart/chartallvisitor'
+import ChartDonutVisitor from '../pengunjung/Chart/chartdonutvisitor'
+import ChartBarVisitor from '../pengunjung/Chart/charbaevisitor'
+import WebsiteStatistic from '../analytics/Component/websitestatistik'
 
 const Card = styled(MuiCard)<CardProps>(() => ({
   border: 0,
@@ -29,7 +28,7 @@ const Card = styled(MuiCard)<CardProps>(() => ({
   backgroundImage: 'url(/images/pages/header-bg.png)'
 }))
 
-const AnalyticsDashboard = () => {
+const PengunjungDashboard = () => {
   const [data, setData] = useState([])
   const [jenisApiOptions, setJenisApiOptions] = useState([])
 
@@ -67,7 +66,7 @@ const AnalyticsDashboard = () => {
             <Card>
               <CardContent sx={{ pt: 26, textAlign: 'center', pb: theme => `${theme.spacing(24)} !important` }}>
                 <Typography sx={{ mb: 4, fontWeight: 500, fontSize: '1.625rem', lineHeight: 1.385 }}>
-                  JUMLAH WEBSITE
+                  DASHBOARD PENGUNJUNG WEBSITE
                 </Typography>
                 <Typography sx={{ mt: 4, color: 'text.secondary' }}>
                 PERANGKAT DAERAH DAN DESA KABUPATEN OGAN ILIR
@@ -75,24 +74,17 @@ const AnalyticsDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} lg={4}>
-          <Grid container spacing={6}>
-              <Grid item xs={6} md={3} lg={6}>
-                <JumlahOpd />
-              </Grid>
-              <Grid item xs={6} md={3} lg={6}>
-                <JumlahKecamatan />
-              </Grid>
-              <Grid item xs={6} md={3} lg={6}>
-                <JumlahKelurahan />
-              </Grid>
-              <Grid item xs={6} md={3} lg={6}>
-                <JumlahDesa />
-              </Grid>
-            </Grid>
+          <Grid item xs={12} md={12}>
+          <WebsiteStatistic data={data} jenisApiOptions={jenisApiOptions}/>
           </Grid>
-          <Grid item xs={12} lg={8}>
-            <JumlahTotal />
+          <Grid item xs={12}>
+            <ChartAllVisitor data={data} jenisApiOptions={jenisApiOptions}  />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ChartBarVisitor data={data} jenisApiOptions={jenisApiOptions} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ChartDonutVisitor data={data} jenisApiOptions={jenisApiOptions} />
           </Grid>
         </Grid>
       </DatePickerWrapper>
@@ -100,4 +92,4 @@ const AnalyticsDashboard = () => {
   )
 }
 
-export default AnalyticsDashboard
+export default PengunjungDashboard

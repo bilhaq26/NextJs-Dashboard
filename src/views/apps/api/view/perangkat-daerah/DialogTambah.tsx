@@ -11,24 +11,28 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 const DialogTambahPerangkatDaerah = ({ open, handleClose, dataPerangkat, showAlert, updateTableData }) => {
   const [formData, setFormData] = useState({
     nama: '',
-    url: ''
+    url: '',
+    jenis: ''
   })
 
   const [formErrors, setFormErrors] = useState({
     nama: '',
-    url: ''
+    url: '',
+    jenis: ''
   })
 
   const initialFormData = {
     nama: '',
-    url: ''
+    url: '',
+    jenis: ''
   }
 
   const handleReset = () => {
     setFormData(initialFormData)
     setFormErrors({
       nama: '',
-      url: ''
+      url: '',
+      jenis: ''
     })
   }
 

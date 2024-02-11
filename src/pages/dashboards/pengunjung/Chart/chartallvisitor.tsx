@@ -149,6 +149,11 @@ const ChartAllVisitor = ({ data }) => {
     }
   }
 
+  const formatDate = (dateString) => {
+    const formattedDate = format(new Date(dateString), "dd MMMM yyyy"); // Format tanggal ke "dd MMMM yyyy"
+    return formattedDate;
+  };
+
   return (
     <Card>
       <CardHeader
@@ -195,8 +200,16 @@ const ChartAllVisitor = ({ data }) => {
             <ReactApexcharts
               type='area'
               height={400}
-              options={options}
-              series={series.map(item => ({ data: item.data, color: item.color }))}
+              options={{
+                ...options,
+                xaxis: {
+                  ...options.xaxis,
+                  categories: series.length > 0 && series[0].date
+                    ? series[0].date.map(date => formatDate(date)) // Memformat setiap tanggal
+                    : [],
+                }
+              }}
+              series={series.map(item => ({ name: item.name, data: item.data, color: item.color }))}
             />
           ) : (
             <div>Data tidak tersedia.</div>

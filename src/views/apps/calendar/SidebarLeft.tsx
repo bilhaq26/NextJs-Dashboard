@@ -94,12 +94,6 @@ const SidebarLeft = (props: SidebarLeftType) => {
           }
         }}
       >
-        <Box sx={{ p: 6, width: '100%' }}>
-          <Button fullWidth variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={handleSidebarToggleSidebar}>
-            <Icon icon='tabler:plus' fontSize='1.125rem' />
-            Add Event
-          </Button>
-        </Box>
 
         <Divider sx={{ width: '100%', m: '0 !important' }} />
         <DatePickerWrapper
@@ -113,22 +107,6 @@ const SidebarLeft = (props: SidebarLeftType) => {
           <DatePicker inline onChange={date => calendarApi.gotoDate(date)} />
         </DatePickerWrapper>
         <Divider sx={{ width: '100%', m: '0 !important' }} />
-        <Box sx={{ p: 6, width: '100%', display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
-          <Typography variant='body2' sx={{ mb: 2, color: 'text.disabled', textTransform: 'uppercase' }}>
-            Filters
-          </Typography>
-          <FormControlLabel
-            label='View All'
-            sx={{ '& .MuiFormControlLabel-label': { color: 'text.secondary' } }}
-            control={
-              <Checkbox
-                checked={store.selectedCalendars.length === colorsArr.length}
-                onChange={e => dispatch(handleAllCalendars(e.target.checked))}
-              />
-            }
-          />
-          {renderFilters}
-        </Box>
       </Drawer>
     )
   } else {

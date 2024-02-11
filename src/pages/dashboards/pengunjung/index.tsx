@@ -33,6 +33,7 @@ const PengunjungDashboard = () => {
   const [jenisApiOptions, setJenisApiOptions] = useState([])
 
   useEffect(() => {
+    // Memuat data dari API daftar API
     const fetchData = async () => {
       try {
         const response = await axios.get('http://newdashboard.bil/api/daftar-api', {
@@ -42,10 +43,13 @@ const PengunjungDashboard = () => {
         })
 
         if (response.data && Array.isArray(response.data.data)) {
-          setData(response.data.data)
+          // Filter data dengan jenis_api: "Visitor" atau id_jenis_api: 2
+          const filteredData = response.data.data.filter(item => item.jenis_api === "Visitor" || item.id_jenis_api === 2);
 
-          const uniqueJenisApiOptions = Array.from(new Set(response.data.data.map(item => item.jenis_api)))
-          setJenisApiOptions(uniqueJenisApiOptions)
+          setData(filteredData);
+
+          const uniqueJenisApiOptions = Array.from(new Set(filteredData.map(item => item.jenis_api)))
+          setJenisApiOptions(uniqueJenisApiOptions);
         } else {
           console.error('Invalid data format. Expecting an array.')
         }

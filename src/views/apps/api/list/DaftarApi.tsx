@@ -77,7 +77,9 @@ const DaftarApi = ({ data, activeTab, searchTerm, updateTableData, handleDeleteC
     }
   }
 
-  const filteredData = data.filter(item => item.perangkat_daerah.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredData = data.filter(item =>
+    item.perangkat_daerah.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Grid container spacing={3} justifyContent='center'>
@@ -150,19 +152,16 @@ const DaftarApi = ({ data, activeTab, searchTerm, updateTableData, handleDeleteC
                   {apiResults[item.id] ? (
                     <div>
                       <div>
-                        <strong>URL:</strong> {apiResults[item.id].url}
-                        {apiResults[item.id].endpoint}
+                      <strong>URL:</strong> {apiResults[item.id].url}
+                      {apiResults[item.id].endpoint}
                       </div>
                       <div>
-                        <strong>API Key:</strong> {apiResults[item.id].data.api_key}
+                      <strong>API Key:</strong> {apiResults[item.id].data.api_key}
                       </div>
-                      <JSONPretty
-                        data={
-                          apiResults[item.id].data.length > 0
-                            ? apiResults[item.id].data.slice(0, 2)
-                            : { message: 'Api Tidak Ditemukan' }
-                        }
-                      />
+                      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                      <JSONPretty data={apiResults[item.id].data} />
+                      </div>
+                      
                     </div>
                   ) : (
                     <JSONPretty data={{ message: 'Api Tidak Ditemukan' }} />

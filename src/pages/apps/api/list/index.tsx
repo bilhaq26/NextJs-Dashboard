@@ -92,10 +92,8 @@ const Api = () => {
   }
 
   const filteredData = data.filter(
-    item =>
-      item.perangkat_daerah.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filterJenisApi === '' || item.jenis_api === filterJenisApi)
-  )
+    item => item.perangkat_daerah.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const openDialog = () => {
     setIsDialogOpen(true)

@@ -17,6 +17,10 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Dashboard Pengunjung',
           path: '/dashboards/pengunjung'
+        },
+        {
+          title: 'Dashboard Berita',
+          path: '/dashboards/berita'
         }
 
         // {

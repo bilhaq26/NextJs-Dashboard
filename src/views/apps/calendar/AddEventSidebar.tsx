@@ -1,23 +1,17 @@
 // ** React Imports
-import { useState, useEffect, forwardRef, useCallback, Fragment } from 'react'
+import { useState, useEffect, forwardRef, useCallback } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
-import Switch from '@mui/material/Switch'
-import Button from '@mui/material/Button'
-import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import CustomAvatar from 'src/@core/components/mui/avatar'
+import CustomChip from 'src/@core/components/mui/chip'
+import { Card, CardContent } from '@mui/material'
 
 // ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
-
-// ** Third Party Imports
-import DatePicker from 'react-datepicker'
-import { useForm, Controller } from 'react-hook-form'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -26,177 +20,65 @@ import Icon from 'src/@core/components/icon'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 // ** Types
-import { EventDateType, AddEventSidebarType } from 'src/types/apps/calendarTypes'
+import { AddEventSidebarType } from 'src/types/apps/calendarTypes'
+import { ThemeColor } from 'src/@core/layouts/types'
+import { getInitials } from 'src/@core/utils/get-initials'
+import { format } from 'date-fns'
+import idLocale from 'date-fns/locale/id';
 
-interface PickerProps {
-  label?: string
-  error?: boolean
-  registername?: string
-}
-
-interface DefaultStateType {
-  url: string
-  title: string
-  allDay: boolean
-  calendar: string
-  description: string
-  endDate: Date | string
-  startDate: Date | string
-  guests: string[] | string | undefined
-}
-
-const capitalize = (string: string) => string && string[0].toUpperCase() + string.slice(1)
-
-const defaultState: DefaultStateType = {
-  url: '',
+const defaultState = {
+  thumbnail: '',
   title: '',
-  guests: [],
-  allDay: true,
-  description: '',
-  endDate: new Date(),
-  calendar: 'Business',
-  startDate: new Date()
-}
+  content: '',
+  create: '',
+  publish: '',
+  view: ''
+};
 
 const AddEventSidebar = (props: AddEventSidebarType) => {
   // ** Props
   const {
     store,
-    dispatch,
-    addEvent,
-    updateEvent,
-    drawerWidth,
-    calendarApi,
-    deleteEvent,
-    handleSelectEvent,
     addEventSidebarOpen,
     handleAddEventSidebarToggle
-  } = props
+  } = props;
 
   // ** States
-  const [values, setValues] = useState<DefaultStateType>(defaultState)
+  const [selectedEventDetails, setSelectedEventDetails] = useState(defaultState);
 
-  const {
-    control,
-    setValue,
-    clearErrors,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({ defaultValues: { title: '' } })
-
-  const handleSidebarClose = async () => {
-    setValues(defaultState)
-    clearErrors()
-    dispatch(handleSelectEvent(null))
-    handleAddEventSidebarToggle()
-  }
-
-  const onSubmit = (data: { title: string }) => {
-    const modifiedEvent = {
-      url: values.url,
-      display: 'block',
-      title: data.title,
-      end: values.endDate,
-      allDay: values.allDay,
-      start: values.startDate,
-      extendedProps: {
-        calendar: capitalize(values.calendar),
-        guests: values.guests && values.guests.length ? values.guests : undefined,
-        description: values.description.length ? values.description : undefined
-      }
-    }
-    if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
-      dispatch(addEvent(modifiedEvent))
-    } else {
-      dispatch(updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }))
-    }
-    calendarApi.refetchEvents()
-    handleSidebarClose()
-  }
-
-  const handleDeleteEvent = () => {
-    if (store.selectedEvent) {
-      dispatch(deleteEvent(store.selectedEvent.id))
-    }
-
-    // calendarApi.getEventById(store.selectedEvent.id).remove()
-    handleSidebarClose()
-  }
-
-  const handleStartDate = (date: Date) => {
-    if (date > values.endDate) {
-      setValues({ ...values, startDate: new Date(date), endDate: new Date(date) })
-    }
+  // ** Functions
+  const handleSidebarClose = () => {
+    setSelectedEventDetails(defaultState);
+    handleAddEventSidebarToggle();
   }
 
   const resetToStoredValues = useCallback(() => {
     if (store.selectedEvent !== null) {
-      const event = store.selectedEvent
-      setValue('title', event.title || '')
-      setValues({
-        url: event.url || '',
-        title: event.title || '',
-        allDay: event.allDay,
-        guests: event.extendedProps.guests || [],
-        description: event.extendedProps.description || '',
-        calendar: event.extendedProps.calendar || 'Business',
-        endDate: event.end !== null ? event.end : event.start,
-        startDate: event.start !== null ? event.start : new Date()
-      })
-    }
-  }, [setValue, store.selectedEvent])
+      const event = store.selectedEvent;
 
-  const resetToEmptyValues = useCallback(() => {
-    setValue('title', '')
-    setValues(defaultState)
-  }, [setValue])
+      setSelectedEventDetails({
+        name: event.extendedProps.name || '', // Menambahkan properti name
+        thumbnail: event.extendedProps.thumbnail || '',
+        title: event.title || '',
+        content: event.extendedProps.content || '',
+        create: event.extendedProps.create || '',
+        view: event.extendedProps.view || ''
+      });
+    }
+  }, [store.selectedEvent]);
 
   useEffect(() => {
     if (store.selectedEvent !== null) {
-      resetToStoredValues()
+      resetToStoredValues();
     } else {
-      resetToEmptyValues()
+      setSelectedEventDetails(defaultState);
     }
-  }, [addEventSidebarOpen, resetToStoredValues, resetToEmptyValues, store.selectedEvent])
+  }, [addEventSidebarOpen, resetToStoredValues, store.selectedEvent]);
 
-  const PickersComponent = forwardRef(({ ...props }: PickerProps, ref) => {
-    return (
-      <CustomTextField
-        inputRef={ref}
-        fullWidth
-        {...props}
-        label={props.label || ''}
-        sx={{ width: '100%' }}
-        error={props.error}
-      />
-    )
-  })
-
-  const RenderSidebarFooter = () => {
-    if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
-      return (
-        <Fragment>
-          <Button type='submit' variant='contained' sx={{ mr: 4 }}>
-            Add
-          </Button>
-          <Button variant='tonal' color='secondary' onClick={resetToEmptyValues}>
-            Reset
-          </Button>
-        </Fragment>
-      )
-    } else {
-      return (
-        <Fragment>
-          <Button type='submit' variant='contained' sx={{ mr: 4 }}>
-            Update
-          </Button>
-          <Button variant='tonal' color='secondary' onClick={resetToStoredValues}>
-            Reset
-          </Button>
-        </Fragment>
-      )
-    }
-  }
+  const isValidDate = (dateString) => {
+    const parsedDate = new Date(dateString);
+    return !isNaN(parsedDate.getTime());
+  };
 
   return (
     <Drawer
@@ -204,7 +86,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       open={addEventSidebarOpen}
       onClose={handleSidebarClose}
       ModalProps={{ keepMounted: true }}
-      sx={{ '& .MuiDrawer-paper': { width: ['100%', drawerWidth] } }}
+      sx={{ '& .MuiDrawer-paper': { width: '100%', md: '30%' } }}
     >
       <Box
         className='sidebar-header'
@@ -214,19 +96,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
           justifyContent: 'space-between'
         }}
       >
-        <Typography variant='h5'>
-          {store.selectedEvent !== null && store.selectedEvent.title.length ? 'Update Event' : 'Add Event'}
-        </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {store.selectedEvent !== null && store.selectedEvent.title.length ? (
-            <IconButton
-              size='small'
-              onClick={handleDeleteEvent}
-              sx={{ color: 'text.primary', mr: store.selectedEvent !== null ? 1 : 0 }}
-            >
-              <Icon icon='tabler:trash' fontSize='1.25rem' />
-            </IconButton>
-          ) : null}
           <IconButton
             size='small'
             onClick={handleSidebarClose}
@@ -246,122 +116,83 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       </Box>
       <Box className='sidebar-body' sx={{ p: theme => theme.spacing(0, 6, 6) }}>
         <DatePickerWrapper>
-          <form onSubmit={handleSubmit(onSubmit)} autoComplete='off'>
-            <Controller
-              name='title'
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { value, onChange } }) => (
-                <CustomTextField
-                  fullWidth
-                  label='Title'
-                  value={value}
-                  sx={{ mb: 4 }}
-                  onChange={onChange}
-                  placeholder='Event Title'
-                  error={Boolean(errors.title)}
-                  {...(errors.title && { helperText: 'This field is required' })}
+          <Card>
+            <CardContent sx={{ pt: 13.5, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+              {selectedEventDetails.thumbnail ? (
+                <CustomAvatar
+                  src={selectedEventDetails.thumbnail}
+                  variant='rounded'
+                  alt={selectedEventDetails.title}
+                  sx={{ width: 100, height: 100, mb: 4 }}
                 />
+              ) : (
+                <CustomAvatar
+                  skin='light'
+                  variant='rounded'
+                  color={selectedEventDetails.color as ThemeColor}
+                  sx={{ width: 100, height: 100, mb: 4, fontSize: '3rem' }}
+                >
+                  {getInitials(selectedEventDetails.title)}
+                </CustomAvatar>
               )}
-            />
-            <CustomTextField
-              select
-              fullWidth
-              sx={{ mb: 4 }}
-              label='Calendar'
-              SelectProps={{
-                value: values.calendar,
-                onChange: e => setValues({ ...values, calendar: e.target.value as string })
-              }}
-            >
-              <MenuItem value='Personal'>Personal</MenuItem>
-              <MenuItem value='Business'>Business</MenuItem>
-              <MenuItem value='Family'>Family</MenuItem>
-              <MenuItem value='Holiday'>Holiday</MenuItem>
-              <MenuItem value='ETC'>ETC</MenuItem>
-            </CustomTextField>
-            <Box sx={{ mb: 4 }}>
-              <DatePicker
-                selectsStart
-                id='event-start-date'
-                endDate={values.endDate as EventDateType}
-                selected={values.startDate as EventDateType}
-                startDate={values.startDate as EventDateType}
-                showTimeSelect={!values.allDay}
-                dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
-                customInput={<PickersComponent label='Start Date' registername='startDate' />}
-                onChange={(date: Date) => setValues({ ...values, startDate: new Date(date) })}
-                onSelect={handleStartDate}
+              <Typography variant='h4' sx={{ mb: 3 }}>
+              {/* {selectedEventDetails.title.split(' ').map((word, index, array) => (
+                <>
+                  {word}
+                  {index < array.length - 1 && ' '}
+                  {index < array.length - 1 && (index + 1) % 4 === 0 && <br />}
+                </>
+              ))} */}
+              {selectedEventDetails.title}
+              </Typography>
+              <CustomChip
+                rounded
+                skin='light'
+                size='small'
+                label={selectedEventDetails.name || ''} // Menambahkan properti name
+                color='primary'
+                sx={{ textTransform: 'capitalize' }}
               />
-            </Box>
-            <Box sx={{ mb: 4 }}>
-              <DatePicker
-                selectsEnd
-                id='event-end-date'
-                endDate={values.endDate as EventDateType}
-                selected={values.endDate as EventDateType}
-                minDate={values.startDate as EventDateType}
-                startDate={values.startDate as EventDateType}
-                showTimeSelect={!values.allDay}
-                dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
-                customInput={<PickersComponent label='End Date' registername='endDate' />}
-                onChange={(date: Date) => setValues({ ...values, endDate: new Date(date) })}
-              />
-            </Box>
-            <FormControl sx={{ mb: 4 }}>
-              <FormControlLabel
-                label='All Day'
-                control={
-                  <Switch checked={values.allDay} onChange={e => setValues({ ...values, allDay: e.target.checked })} />
-                }
-              />
-            </FormControl>
-            <CustomTextField
-              fullWidth
-              type='url'
-              id='event-url'
-              sx={{ mb: 4 }}
-              label='Event URL'
-              value={values.url}
-              placeholder='https://www.google.com'
-              onChange={e => setValues({ ...values, url: e.target.value })}
-            />
+            </CardContent>
 
-            <CustomTextField
-              select
-              fullWidth
-              label='Guests'
-              sx={{ mb: 4 }}
-              SelectProps={{
-                multiple: true,
-                value: values.guests,
-                onChange: e => setValues({ ...values, guests: e.target.value as string })
-              }}
-            >
-              <MenuItem value='bruce'>Bruce</MenuItem>
-              <MenuItem value='clark'>Clark</MenuItem>
-              <MenuItem value='diana'>Diana</MenuItem>
-              <MenuItem value='john'>John</MenuItem>
-              <MenuItem value='barry'>Barry</MenuItem>
-            </CustomTextField>
-            <CustomTextField
-              rows={4}
-              multiline
-              fullWidth
-              sx={{ mb: 6.5 }}
-              label='Description'
-              id='event-description'
-              value={values.description}
-              onChange={e => setValues({ ...values, description: e.target.value })}
-            />
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <RenderSidebarFooter />
-            </Box>
-          </form>
+            <CardContent sx={{ pt: theme => `${theme.spacing(2)} !important` }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ mr: 8, display: 'flex', alignItems: 'center' }}>
+                  <div>
+                  {isValidDate(selectedEventDetails.create)
+                  ? format(new Date(selectedEventDetails.create), "dd MMMM yyyy HH:mm", { locale: idLocale })
+                  : 'Tanggal tidak valid'}
+                    <Typography variant='body2'>Tanggal Buat</Typography>
+                  </div>
+                </Box>
+                <Box sx={{ mr: 8, display: 'flex', alignItems: 'center' }}>
+                  <div>
+                    <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{selectedEventDetails.view}</Typography>
+                    <Typography variant='body2'>Views</Typography>
+                  </div>
+                </Box>
+              </Box>
+            </CardContent>
+            <CardContent sx={{ pb: 4 }}>
+              <Typography variant='body2' sx={{ color: 'text.disabled', textTransform: 'uppercase' }}>
+                Details
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ mr: 8, display: 'flex', alignItems: 'center' }}>
+                  <div>
+                    <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                      <div dangerouslySetInnerHTML={{ __html: selectedEventDetails.content }} />
+                    </Typography>
+                    <Typography variant='body2'>Konten Acara</Typography>
+                  </div>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
         </DatePickerWrapper>
       </Box>
     </Drawer>
-  )
+  );
 }
 
-export default AddEventSidebar
+export default AddEventSidebar;

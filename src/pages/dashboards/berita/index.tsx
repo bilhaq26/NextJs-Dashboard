@@ -41,6 +41,9 @@ import ApexAreaChart from 'src/views/charts/apex-charts/ApexAreaChart'
 import WebsiteStatistic from '../analytics/Component/websitestatistik'
 import ChartBerita from './Chart/chartberita'
 import axios from 'axios'
+import CalendarBerita from './CalendarBerita'
+import { MenuItem } from '@mui/material'
+import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** CalendarColors
 const calendarsColor: CalendarColors = {
@@ -54,35 +57,54 @@ const calendarsColor: CalendarColors = {
 const DaftarBerita = () => {
   const [data, setData] = useState([])
   const [jenisApiOptions, setJenisApiOptions] = useState([])
+  const [selectedPerangkatDaerah, setSelectedPerangkatDaerah] = useState('');
+  const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
-    // Memuat data dari API daftar API
     const fetchData = async () => {
       try {
         const response = await axios.get('http://newdashboard.bil/api/daftar-api', {
           headers: {
             key: '1234567890'
           }
-        })
-
+        });
+  
         if (response.data && Array.isArray(response.data.data)) {
-          // Filter data dengan jenis_api: "Visitor" atau id_jenis_api: 2
+          // Filter data dengan jenis_api: "Berita" atau id_jenis_api: 1
           const filteredData = response.data.data.filter(item => item.jenis_api === "Berita" || item.id_jenis_api === 1);
-
-          setData(filteredData);
-
-          const uniqueJenisApiOptions = Array.from(new Set(filteredData.map(item => item.jenis_api)))
+  
+          // Jika selectedPerangkatDaerah tidak dipilih, tampilkan semua berita
+          const filteredDataByPerangkat = selectedPerangkatDaerah
+            ? filteredData.filter(item => item.perangkat_daerah === selectedPerangkatDaerah)
+            : filteredData;
+  
+          setData(filteredDataByPerangkat);
+  
+          const uniqueJenisApiOptions = Array.from(new Set(filteredData.map(item => item.perangkat_daerah)))
           setJenisApiOptions(uniqueJenisApiOptions);
         } else {
-          console.error('Invalid data format. Expecting an array.')
+          console.error('Invalid data format. Expecting an array.');
         }
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching data:', error);
       }
-    }
+    };
+  
+    fetchData();
+  }, [selectedPerangkatDaerah]);
 
-    fetchData()
-  }, [])
+  useEffect(() => {
+    // Mengambil data yang dipilih berdasarkan selectedPerangkatDaerah
+    const selectedData = selectedPerangkatDaerah
+      ? data.filter((item) => item.perangkat_daerah === selectedPerangkatDaerah)
+      : data;
+    setSelectedData(selectedData[0] || null);
+  }, [selectedPerangkatDaerah, data]);
+
+  const handlePerangkatDaerahChange = (value) => {
+    setSelectedPerangkatDaerah(value);
+  };
+
 
 
   // ** States
@@ -111,24 +133,22 @@ const DaftarBerita = () => {
 
   return (
     <>
-    <ApexChartWrapper style={{ marginBottom: '20px' }}>
-      <DatePickerWrapper>
-        <Grid container spacing={6} className='match-height'>
-          <PageHeader
-            title={
-              <Typography variant='h4'>
-               React ApexCharts
-              </Typography>
-            }
-            subtitle={<Typography sx={{ color: 'text.secondary' }}>React Component for ApexCharts</Typography>}
-          />
-          <Grid item xs={12}>
-          <ChartBerita data={data} jenisApiOptions={jenisApiOptions}/>
-          </Grid>
-        </Grid>
-      </DatePickerWrapper>
-    </ApexChartWrapper>
-
+    <CustomTextField
+      select
+      fullWidth
+      label='Pilih Perangkat Daerah'
+      id='form-layouts-separator-select'
+      value={selectedPerangkatDaerah}
+      onChange={(e) => handlePerangkatDaerahChange(e.target.value)}
+    >
+      {/* Menambahkan opsi untuk memilih semua berita */}
+      <MenuItem value=''>Semua Berita</MenuItem>
+      {jenisApiOptions.map((perangkatDaerah) => (
+        <MenuItem key={perangkatDaerah} value={perangkatDaerah}>
+          {perangkatDaerah}
+        </MenuItem>
+      ))}
+    </CustomTextField>
     <CalendarWrapper
       className='app-calendar mt-5'
       style={{ marginTop: '20px' }}
@@ -162,7 +182,8 @@ const DaftarBerita = () => {
           ...(mdAbove ? { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 } : {})
         }}
       >
-        <Calendar
+        <CalendarBerita
+          data={data}
           store={store}
           dispatch={dispatch}
           direction={direction}
@@ -173,6 +194,7 @@ const DaftarBerita = () => {
           handleSelectEvent={handleSelectEvent}
           handleLeftSidebarToggle={handleLeftSidebarToggle}
           handleAddEventSidebarToggle={handleAddEventSidebarToggle}
+          selectedPerangkatDaerah={selectedPerangkatDaerah}
         />
       </Box>
       <AddEventSidebar

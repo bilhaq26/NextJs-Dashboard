@@ -157,31 +157,35 @@ const ChartBerita = ({ data }) => {
   };
 
   useEffect(() => {
+    const convertDateFormat = (rawDate) => {
+      const date = new Date(rawDate);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+  
     const fetchData = async () => {
       try {
         const { start, end } = getLast30Days();
-        console.log('Fetching data for the last 30 days:', start, end);
         setStartDate(start);
         setEndDate(end);
-  
+    
         const newData = await Promise.all(
           data.map(async (item) => {
             if (!selectedDevice || item.perangkat_daerah === selectedDevice) {
-              const fullUrl = item.url + item.endpoint;
-              console.log(`Fetching data for ${item.perangkat_daerah} from ${fullUrl}`);
-  
+              const fullUrl = `${item.url}${item.endpoint}`;
               const response = await axios.get(fullUrl, {
                 headers: {
                   key: item.api_key
                 }
               });
-  
+    
               const resData = response.data.data;
-  
+    
               if (Array.isArray(resData)) {
-                console.log('Valid data format. Processing data:', resData);
                 const randomColor = generateRandomColor();
-  
+    
                 const processedData = resData.map(itemData => ({
                   name: item.perangkat_daerah,
                   title: itemData.title,
@@ -195,21 +199,16 @@ const ChartBerita = ({ data }) => {
                   author: itemData.author,
                   color: randomColor
                 }));
-  
+    
                 // Filter data untuk satu bulan terakhir
                 const filteredData = processedData.filter(({ date }) => {
                   const dateObj = new Date(date);
                   return dateObj >= start && dateObj <= end;
                 });
-  
-                // Menghitung jumlah berita setiap tanggal
+    
                 const countedData = countDataPerDate(filteredData);
-                console.log('Counted Data:', countedData);
                 setCountedData(countedData);
-  
-                // Log hasil filter
-                console.log('Filtered Data:', filteredData);
-  
+    
                 return filteredData;
               } else {
                 console.error('Invalid data format. Please provide an array.', resData);
@@ -219,16 +218,19 @@ const ChartBerita = ({ data }) => {
             return null;
           })
         );
-  
+    
         const filteredData = newData.filter(item => item !== null);
         setSeries(filteredData.flat());
-  
+    
+        // Tampilkan jumlah data dengan tanggal yang sama di console log
+        console.log('Counted Data:', countedData);
+    
         // Ubah countedData ke format yang dapat digunakan oleh grafik
         const chartData = Object.keys(countedData).map(date => ({
           date,
           count: countedData[date]
-        })).slice(-30); // Mengambil hanya 30 hari terakhir
-  
+        }));
+    
         // Set data grafik
         setChartData(chartData);
       } catch (error) {
@@ -241,63 +243,53 @@ const ChartBerita = ({ data }) => {
   
     fetchData();
   }, [data, selectedDevice]);
-  
 
   const [chartData, setChartData] = useState([]);
 
   const options = {
-    chart: {
-      parentHeightOffset: 0,
-      toolbar: { show: false }
-    },
-    tooltip: {
-      show: true,
-      y: {
-        formatter: function (value) {
-          return `Jumlah Berita: ${value}`;
-        }
-      }
-    },
-    dataLabels: { enabled: false },
-    stroke: {
-      show: false,
-      curve: 'smooth'
-    },
-    legend: {
-      show: false,
-    },
-    colors: [areaColors.series1],
-    fill: {
-      opacity: 1,
-      type: 'solid'
-    },
-    grid: {
-      show: true,
-      borderColor: theme.palette.divider,
-      xaxis: {
-        lines: { show: true }
-      }
-    },
-    yaxis: {
-      show: false,
-    },
+  chart: {
+    parentHeightOffset: 0,
+    toolbar: { show: false }
+  },
+  tooltip: { show: false }, // Menyembunyikan tooltip
+  dataLabels: { enabled: false }, // Menonaktifkan label data
+  stroke: {
+    show: false,
+    curve: 'smooth' // Ubah ke 'smooth' agar kurva lebih halus
+  },
+  legend: {
+    show: false, // Menyembunyikan legend
+  },
+  colors: [areaColors.series1], // Sesuaikan dengan warna yang diinginkan
+  fill: {
+    opacity: 1,
+    type: 'solid'
+  },
+  grid: {
+    show: true,
+    borderColor: theme.palette.divider,
     xaxis: {
-      axisBorder: { show: false },
-      axisTicks: { color: theme.palette.divider },
-      crosshairs: {
-        stroke: { color: theme.palette.divider }
-      },
-      labels: {
-        show: true,
-      },
-      categories: chartData.map(item => item.date),
-    },
-    title: {
-      text: '',
+      lines: { show: true }
     }
-  };
-  
-  
+  },
+  yaxis: {
+    show: false, // Menyembunyikan label sumbu y
+  },
+  xaxis: {
+    axisBorder: { show: false },
+    axisTicks: { color: theme.palette.divider },
+    crosshairs: {
+      stroke: { color: theme.palette.divider }
+    },
+    labels: {
+      show: true, // Tampilkan label sumbu x
+    },
+    categories: chartData.map(item => item.date),
+  },
+  title: {
+    text: '',  // Set judul menjadi string kosong untuk menghilangkan judul
+  }
+};
 
   const formatDate = (dateString) => {
     const formattedDate = format(new Date(dateString), 'dd MMMM yyyy');
@@ -340,7 +332,7 @@ const ChartBerita = ({ data }) => {
             position: 'absolute',
             color: 'common.white',
             zIndex: theme.zIndex.mobileStepper - 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            backgroundColor: 'rgba(0, 0, 0, 0.5)' // Menambahkan latar belakang transparan
           }}
         >
           <CircularProgress color='inherit' />
@@ -350,19 +342,23 @@ const ChartBerita = ({ data }) => {
           <ReactApexcharts
             type='area'
             height={400}
-            options={options}
+            options={{
+              ...options,
+              xaxis: {
+                ...options.xaxis,
+                categories: chartData.map(item => item.date)
+              }
+            }}
             series={[{
-              // memanggil nama perangkat daerah
-              name: selectedDevice || data[0].perangkat_daerah,
+              name: 'Count',
               data: chartData.map(item => item.count),
-              color: areaColors.series1
+              color: areaColors.series1 // Sesuaikan dengan warna yang diinginkan
             }]}
           />
         ) : (
           <div>Data tidak tersedia.</div>
         )
       )}
-
       </CardContent>
     </Card>
   );
